@@ -26,11 +26,10 @@ namespace BattleShipsServer
             ip = Getipadress();
             Console.WriteLine(ip.ToString());
             Start();
-            Console.ReadLine();
         }
         static void Start()
         {
-            Server = new TcpListener(IPAddress.Loopback,777);
+            Server = new TcpListener(IPAddress.Any,666);
             Server.Start();
             while (true)
             {
@@ -59,9 +58,8 @@ namespace BattleShipsServer
                 if ((i = RecieveDataStream.Read(bytes, 0, bytes.Length)) != 0)
                 {
                     data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    Console.WriteLine(data);
-                    Log("hi");
-                    // recieve username and game they want to join
+                    Log($"Recieved from {p.name} - {data}");
+                    
                 }
             }
         }
@@ -77,13 +75,13 @@ namespace BattleShipsServer
             }
             return null;
         }
-        static void Log(string message)
+        public static void Log(string message)
         {
             StreamWriter swAppend = File.AppendText(LogName);
             swAppend.WriteLine("["+DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString()+"]"+" - "+message);
             swAppend.Close();
         }
-        static void MakeLog()
+        public static void MakeLog()
         {
             if (!Directory.Exists("Logs/"))
             {

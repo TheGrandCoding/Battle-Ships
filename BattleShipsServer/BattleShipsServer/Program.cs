@@ -19,6 +19,7 @@ namespace BattleShipsServer
         public static TcpListener Server;
         public static IPAddress ip;
         public static string LogName;
+        public static List<Game> CurrentGames = new List<Game>();
         static void Main(string[] args)
         {
             MakeLog();
@@ -43,26 +44,10 @@ namespace BattleShipsServer
         {
             Player p = new Player();
             p.client = c;
-            Thread RD = new Thread(() => RecieveData(p));
+            Thread RD = new Thread(p.RecieveData);
             RD.Start();
         }
-        static void RecieveData(Player p)
-        {
-            TcpClient clt = p.client;
-            string data = "";
-            NetworkStream RecieveDataStream = clt.GetStream();
-            byte[] bytes = new byte[256];
-            int i;
-            while (true)
-            {
-                if ((i = RecieveDataStream.Read(bytes, 0, bytes.Length)) != 0)
-                {
-                    data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    Log($"Recieved from {p.name} - {data}");
-                    
-                }
-            }
-        }
+        
         static IPAddress Getipadress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());

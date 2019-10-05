@@ -94,6 +94,7 @@ namespace BattleShipsServer
                                     GameIn = g;
                                     g.p2 = this;
                                     Send("JoinedGame:" + g.Name);
+                                    g.StartGame();
                                 }
                             }
                         }

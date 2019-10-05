@@ -62,9 +62,10 @@ namespace BattleShipsServer
         }
         public static void Log(string message)
         {
-            StreamWriter swAppend = File.AppendText(LogName);
-            swAppend.WriteLine("["+DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString()+"]"+" - "+message);
-            swAppend.Close();
+            using (StreamWriter swAppend = File.AppendText(LogName))
+            {
+                swAppend.WriteLine("[" + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString() + "]" + " - " + message);
+            }
         }
         public static void MakeLog()
         {

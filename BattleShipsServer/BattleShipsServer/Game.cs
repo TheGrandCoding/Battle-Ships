@@ -14,8 +14,9 @@ namespace BattleShipsServer
 
         public void StartGame()
         {
-            p1.Send("StartGame");//possibly change to opponents name?
-            p2.Send("StartGame");
+            p1.Send("Opp:"+p2.name);
+            p2.Send("Opp:"+p1.name);
+            Program.CurrentGames.Remove(this);
         }
     }
 }

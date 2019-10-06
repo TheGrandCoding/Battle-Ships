@@ -16,13 +16,14 @@ namespace BattleShipsServer
         public TcpClient client;
         public string name;
 
+        string sentmessage;
         public void Send(string message)
         {
             try
             {
-                message = $"%{message}`";
+                sentmessage = $"%{message}`";
                 NetworkStream SendDataStream = client.GetStream();
-                byte[] msg = System.Text.Encoding.ASCII.GetBytes(message);
+                byte[] msg = System.Text.Encoding.ASCII.GetBytes(sentmessage);
                 SendDataStream.Write(msg, 0, msg.Length);
                 Program.Log($"Sent to {name} - {message}");
             }
@@ -31,6 +32,8 @@ namespace BattleShipsServer
                 Program.Log("[Error]"+ex.ToString());
             }
         }
+        Game temp;
+
         public void RecieveData()
         {
             string data = "";
@@ -91,12 +94,13 @@ namespace BattleShipsServer
                             {
                                 if (g.Name == splitlist[1])
                                 {
-                                    GameIn = g;
-                                    g.p2 = this;
-                                    Send("JoinedGame:" + g.Name);
-                                    g.StartGame();
+                                    temp = g;
                                 }
                             }
+                            GameIn = temp;
+                            temp.p2 = this;
+                            Send("JoinedGame:" + temp.Name);
+                            temp.StartGame();
                         }
                     }
                 }

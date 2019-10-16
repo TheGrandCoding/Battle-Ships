@@ -60,13 +60,19 @@ namespace BattleShipsServer
             }
             return null;
         }
+
+        static object LogLock = new object();
         public static void Log(string message)
         {
-            using (StreamWriter swAppend = File.AppendText(LogName))
+            lock (LogLock)
             {
-                swAppend.WriteLine("[" + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString() + "]" + " - " + message);
+                using (StreamWriter swAppend = File.AppendText(LogName))
+                {
+                    swAppend.WriteLine("[" + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString() + "]" + " - " + message);
+                }
             }
         }
+
         public static void MakeLog()
         {
             if (!Directory.Exists("Logs/"))

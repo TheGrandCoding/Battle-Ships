@@ -49,6 +49,7 @@ namespace BattleShipsServer
                     foreach (var msg in messages)
                     {
                         data = msg.Substring(0, msg.IndexOf("`"));
+                        Console.WriteLine($"Recieved from {name} - {data}");
                         Program.Log($"Recieved from {name} - {data}");
                         if (data.StartsWith("UN:"))
                         {

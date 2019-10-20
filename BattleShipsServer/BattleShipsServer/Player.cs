@@ -12,6 +12,7 @@ namespace BattleShipsServer
 {
     class Player
     {
+        public char[,] Ships = new char[10, 10];
         public Game GameIn;
         public TcpClient client;
         public string name;

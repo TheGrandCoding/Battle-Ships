@@ -43,15 +43,30 @@ namespace BattleShipsServer
         }
         public void CheckShip(string ShipNum , Player p)
         {
+            char value;
+            Player opp;
             if (p == p1)
             {
-                char value = p2.Ships[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+                opp = p2;
             }
             else
             {
-                char value = p1.Ships[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+                opp = p1;
             }
-
+            value = opp.Ships[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+            if (value  == 'O')
+            {
+                p.Send("Miss:"+ShipNum);
+                opp.Send("OMiss:"+ShipNum);
+            }else if(value  == 'X'||value  == 'M')
+            {
+                p.Send("Invalid");
+            }
+            else
+            {
+                p.Send("Hit:"+ShipNum);
+                opp.Send("OHit:"+ShipNum);
+            }
         }
     }
 }

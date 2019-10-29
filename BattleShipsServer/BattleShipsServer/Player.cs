@@ -12,6 +12,7 @@ namespace BattleShipsServer
 {
     class Player
     {
+        public bool ShipSent = false;
         public char[,] Ships = new char[10, 10];
         public Game GameIn;
         public TcpClient client;
@@ -34,7 +35,8 @@ namespace BattleShipsServer
             }
         }
         Game temp;
-
+        List<char> ShipLetters = new List<char>() { 'A', 'B', 'C', 'D', 'E' };
+        int ShipNumber = 0;
         public void RecieveData()
         {
             string data = "";
@@ -103,9 +105,35 @@ namespace BattleShipsServer
                             temp.p2 = this;
                             Send("JoinedGame:" + temp.Name);
                             temp.StartGame();
+                        }else if (data.StartsWith("Ships:"))
+                        {
+                            var SL = data.Split(':');
+                            var splitlist = SL[1].Split(',');
+                            foreach(var c in splitlist)
+                            {
+                                Ships[int.Parse(c[0].ToString()),int.Parse(c[1].ToString())] = ShipLetters[ShipNumber];
+                            }
+                            ShipNumber++;
+                        }
+                        else if(data == "ShipsConfirmed")
+                        {
+                            PrintShips();
+                            ShipSent = true;
+                            GameIn.Play();
                         }
                     }
                 }
+            }
+        }
+        private void PrintShips()
+        {
+            for(int y = 0; y < 10; y++)
+            {
+                for(int x = 0; x < 10; x++)
+                {
+                    Console.Write(Ships[x, y]);
+                }
+                Console.Write("\n");
             }
         }
     }

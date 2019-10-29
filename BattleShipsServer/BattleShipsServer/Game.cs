@@ -20,8 +20,8 @@ namespace BattleShipsServer
             {
                 for (int b = 0; b < 10; b++)
                 {
-                    p1.Ships[a, b] = 'O';
-                    p2.Ships[a, b] = 'O';
+                    p1.Board[a, b] = 'O';
+                    p2.Board[a, b] = 'O';
                 }
             }
             Program.CurrentGames.Remove(this);
@@ -53,19 +53,65 @@ namespace BattleShipsServer
             {
                 opp = p1;
             }
-            value = opp.Ships[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+            value = opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
             if (value  == 'O')
             {
+                opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())] = 'M';
                 p.Send("Miss:"+ShipNum);
                 opp.Send("OMiss:"+ShipNum);
-            }else if(value  == 'X'||value  == 'M')
+
+                opp.Send("Turn");
+            }
+            else if(value  == 'X'||value  == 'M')
             {
                 p.Send("Invalid");
             }
             else
             {
+                opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())] = 'X';
+                string SunkShip = CheckShipTaken(value,opp);
                 p.Send("Hit:"+ShipNum);
                 opp.Send("OHit:"+ShipNum);
+                if(SunkShip != null)
+                {
+                    p.Send("OSunk:"+SunkShip);
+                }
+                opp.Send("Turn");
+            }
+        }
+        private string CheckShipTaken(char ShipLetter , Player player)
+        {
+            bool Sunk = true;
+            foreach(char c in player.Board)
+            {
+                if(c == ShipLetter)
+                {
+                    Sunk = false;
+                }
+            }
+            if(Sunk == true)
+            {
+                string ShipSunk = "";
+                foreach(string s in player.Ships)
+                {
+                    if (s.StartsWith(ShipLetter.ToString()))
+                    {
+                        var splitlist = s.Split(':');
+                        if(ShipSunk == "")
+                        {
+                            ShipSunk = splitlist[1];
+                        }
+                        else
+                        {
+                            ShipSunk +=","+ splitlist[1];
+                        }
+                    }
+                }
+                return ShipSunk;
+            }
+            else
+            {
+                return null;
             }
         }
     }

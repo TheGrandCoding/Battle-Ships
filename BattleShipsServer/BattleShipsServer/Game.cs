@@ -41,5 +41,17 @@ namespace BattleShipsServer
                 }
             }
         }
+        public void CheckShip(string ShipNum , Player p)
+        {
+            if (p == p1)
+            {
+                char value = p2.Ships[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+            }
+            else
+            {
+                char value = p1.Ships[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+            }
+
+        }
     }
 }

@@ -34,10 +34,12 @@ namespace BattleShipsServer
                 if(Turn == 0)
                 {
                     p1.Send("Turn");
+                    p1.Send("OTurn");
                 }
                 else
                 {
                     p2.Send("Turn");
+                    p1.Send("OTurn");
                 }
             }
         }
@@ -75,8 +77,10 @@ namespace BattleShipsServer
                 if(SunkShip != null)
                 {
                     p.Send("OSunk:"+SunkShip);
+                    opp.Send("Sunk:" + SunkShip);
                 }
                 opp.Send("Turn");
+                p.Send("OTurn");
             }
         }
         private string CheckShipTaken(char ShipLetter , Player player)

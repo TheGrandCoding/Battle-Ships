@@ -16,6 +16,7 @@ namespace BattleShipsServer
         {
             p1.Send("Opp:"+p2.name);
             p2.Send("Opp:"+p1.name);
+            //p1.Send("Win");
             for (int a = 0; a < 10; a++)
             {
                 for (int b = 0; b < 10; b++)
@@ -71,19 +72,26 @@ namespace BattleShipsServer
             else
             {
                 opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())] = 'X';
-                string SunkShip = CheckShipTaken(value,opp);
+                string SunkShip = GetTakenShip(value,opp);
                 p.Send("Hit:"+ShipNum);
                 opp.Send("OHit:"+ShipNum);
                 if(SunkShip != null)
                 {
                     p.Send("OSunk:"+SunkShip);
                     opp.Send("Sunk:" + SunkShip);
+                    bool GameEnd = CheckGameEnd(opp);
+                    if(GameEnd == true)
+                    {
+                        p.Send("Win");
+                        opp.Send("Lose");
+                        return;
+                    }
                 }
                 opp.Send("Turn");
                 p.Send("OTurn");
             }
         }
-        private string CheckShipTaken(char ShipLetter , Player player)
+        private bool CheckShipTaken(char ShipLetter , Player player)
         {
             bool Sunk = true;
             foreach(char c in player.Board)
@@ -93,21 +101,36 @@ namespace BattleShipsServer
                     Sunk = false;
                 }
             }
-            if(Sunk == true)
+            return Sunk;
+        }
+        private bool CheckGameEnd(Player p)
+        {
+            bool GameEnd;
+            GameEnd = CheckShipTaken('A', p);
+            GameEnd = CheckShipTaken('B', p);
+            GameEnd = CheckShipTaken('C', p);
+            GameEnd = CheckShipTaken('D', p);
+            GameEnd = CheckShipTaken('E', p);
+            return GameEnd;
+        }
+        private string GetTakenShip(char ShipLetter , Player player)
+        {
+            bool Sunk = CheckShipTaken(ShipLetter, player);
+            if (Sunk == true)
             {
                 string ShipSunk = "";
-                foreach(string s in player.Ships)
+                foreach (string s in player.Ships)
                 {
                     if (s.StartsWith(ShipLetter.ToString()))
                     {
                         var splitlist = s.Split(':');
-                        if(ShipSunk == "")
+                        if (ShipSunk == "")
                         {
                             ShipSunk = splitlist[1];
                         }
                         else
                         {
-                            ShipSunk +=","+ splitlist[1];
+                            ShipSunk += "," + splitlist[1];
                         }
                     }
                 }

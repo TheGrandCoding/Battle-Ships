@@ -14,8 +14,12 @@ namespace BattleShipsServer
         Random rnd = new Random();
         public void StartGame()
         {
+            Program.CurrentGames.Remove(this);
             p1.Send("Opp:"+p2.name);
             p2.Send("Opp:"+p1.name);
+            p1.GameIn = null;
+            p1.Ships.Clear();
+            p1.ShipSent = false;
             for (int a = 0; a < 10; a++)
             {
                 for (int b = 0; b < 10; b++)
@@ -24,7 +28,6 @@ namespace BattleShipsServer
                     p2.Board[a, b] = 'O';
                 }
             }
-            Program.CurrentGames.Remove(this);
         }
         public void Play()
         {
@@ -82,7 +85,13 @@ namespace BattleShipsServer
                     if(GameEnd == true)
                     {
                         p.Send("Win");
+                        p.GameIn = null;
+                        p.Ships.Clear();
+                        p.ShipSent = false;
                         opp.Send("Lose");
+                        opp.GameIn = null;
+                        opp.Ships.Clear();
+                        opp.ShipSent = false;
                         return;
                     }
                 }

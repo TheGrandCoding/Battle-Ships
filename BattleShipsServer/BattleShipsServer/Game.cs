@@ -16,7 +16,6 @@ namespace BattleShipsServer
         {
             p1.Send("Opp:"+p2.name);
             p2.Send("Opp:"+p1.name);
-            //p1.Send("Win");
             for (int a = 0; a < 10; a++)
             {
                 for (int b = 0; b < 10; b++)
@@ -35,7 +34,7 @@ namespace BattleShipsServer
                 if(Turn == 0)
                 {
                     p1.Send("Turn");
-                    p1.Send("OTurn");
+                    p2.Send("OTurn");
                 }
                 else
                 {

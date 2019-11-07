@@ -48,19 +48,14 @@ namespace BattleShipsServer
         }
         public void CheckShip(string ShipNum , Player p)
         {
-            char value;
             Player opp;
             if (p == p1)
-            {
                 opp = p2;
-            }
             else
-            {
                 opp = p1;
-            }
             int xpos = int.Parse(ShipNum[0].ToString());
             int ypos = int.Parse(ShipNum[1].ToString());
-            value = opp.Board[xpos,ypos ];
+            char value = opp.Board[xpos,ypos ];
             if (value  == 'O')
             {
                 opp.Board[xpos, ypos] = 'M';
@@ -122,8 +117,7 @@ namespace BattleShipsServer
         }
         private string GetTakenShip(char ShipLetter , Player player)
         {
-            bool Sunk = CheckShipTaken(ShipLetter, player);
-            if (Sunk == true)
+            if(CheckShipTaken(ShipLetter, player))
             {
                 string ShipSunk = "";
                 foreach (string s in player.Ships)

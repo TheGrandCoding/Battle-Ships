@@ -30,7 +30,7 @@ namespace BattleShipsServer
         }
         static void Start()
         {
-            Server = new TcpListener(IPAddress.Any,666);
+            Server = new TcpListener(IPAddress.Any,9876);
             Server.Start();
             while (true)
             {
@@ -68,7 +68,7 @@ namespace BattleShipsServer
             {
                 using (StreamWriter swAppend = File.AppendText(LogName))
                 {
-                    swAppend.WriteLine("[" + DateTime.Now.Hour.ToString() + ":" + DateTime.Now.Minute.ToString() + ":" + DateTime.Now.Second.ToString() + "]" + " - " + message);
+                    swAppend.WriteLine($"[{DateTime.Now.Hour.ToString()}:{DateTime.Now.Minute.ToString()}:{DateTime.Now.Second.ToString()}] - {message}");
                 }
             }
         }
@@ -80,8 +80,14 @@ namespace BattleShipsServer
                 Directory.CreateDirectory("Logs");
             }
             LogName = $"logs/" + DateTime.Today.Day.ToString() + " " + DateTime.Today.Month.ToString() + " & " + DateTime.Now.Hour.ToString() + ";" + DateTime.Now.Minute.ToString() +".txt";
-            StreamWriter swNew = File.CreateText(LogName);
-            swNew.Close();
+            if (File.Exists("Logs/" + LogName))
+            {
+                LogName = LogName + "1";
+            }
+            using (StreamWriter swNew = File.CreateText(LogName))
+            {
+                swNew.Close();
+            }
         }
     }
 }

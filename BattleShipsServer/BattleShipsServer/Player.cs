@@ -26,13 +26,13 @@ namespace BattleShipsServer
             {
                 sentmessage = $"%{message}`";
                 NetworkStream SendDataStream = client.GetStream();
-                byte[] msg = System.Text.Encoding.ASCII.GetBytes(sentmessage);
+                byte[] msg = System.Text.Encoding.Unicode.GetBytes(sentmessage);
                 SendDataStream.Write(msg, 0, msg.Length);
                 Program.Log($"Sent to {name} - {message}");
             }
             catch (Exception ex)
             {
-                Program.Log("[Error]"+ex.ToString());
+                Program.Log($"[Error]{name}-{ex.ToString()}");
             }
         }
         Game temp;
@@ -48,7 +48,7 @@ namespace BattleShipsServer
             {
                 if ((i = RecieveDataStream.Read(bytes, 0, bytes.Length)) != 0)
                 {
-                    string DataBunched = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                    string DataBunched = System.Text.Encoding.Unicode.GetString(bytes, 0, i);
                     string[] messages = DataBunched.Split('%').Where(x => string.IsNullOrWhiteSpace(x) == false && x != "%").ToArray();
                     foreach (var msg in messages)
                     {

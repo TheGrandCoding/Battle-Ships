@@ -17,7 +17,7 @@ namespace BattleShipsServer
             Program.CurrentGames.Remove(this);
             p1.Send("Opp:"+p2.name);
             p2.Send("Opp:"+p1.name);
-            p1.GameIn = null;
+            p1.GameIn = this; // ?
             p1.Ships.Clear();
             p1.ShipSent = false;
             for (int a = 0; a < 10; a++)
@@ -58,10 +58,12 @@ namespace BattleShipsServer
             {
                 opp = p1;
             }
-            value = opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())];
+            int xpos = int.Parse(ShipNum[0].ToString());
+            int ypos = int.Parse(ShipNum[1].ToString());
+            value = opp.Board[xpos,ypos ];
             if (value  == 'O')
             {
-                opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())] = 'M';
+                opp.Board[xpos, ypos] = 'M';
                 p.Send("Miss:"+ShipNum);
                 opp.Send("OMiss:"+ShipNum);
 
@@ -73,7 +75,7 @@ namespace BattleShipsServer
             }
             else
             {
-                opp.Board[int.Parse(ShipNum[0].ToString()), int.Parse(ShipNum[1].ToString())] = 'X';
+                opp.Board[xpos, ypos] = 'X';
                 string SunkShip = GetTakenShip(value,opp);
                 p.Send("Hit:"+ShipNum);
                 opp.Send("OHit:"+ShipNum);
@@ -96,7 +98,6 @@ namespace BattleShipsServer
                     }
                 }
                 opp.Send("Turn");
-                p.Send("OTurn");
             }
         }
         private bool CheckShipTaken(char ShipLetter , Player player)
@@ -113,13 +114,11 @@ namespace BattleShipsServer
         }
         private bool CheckGameEnd(Player p)
         {
-            bool GameEnd;
-            GameEnd = CheckShipTaken('A', p);
-            GameEnd = CheckShipTaken('B', p);
-            GameEnd = CheckShipTaken('C', p);
-            GameEnd = CheckShipTaken('D', p);
-            GameEnd = CheckShipTaken('E', p);
-            return GameEnd;
+            return CheckShipTaken('A', p)
+                && CheckShipTaken('B', p)
+                && CheckShipTaken('C', p)
+                && CheckShipTaken('D', p)
+                && CheckShipTaken('E', p);
         }
         private string GetTakenShip(char ShipLetter , Player player)
         {

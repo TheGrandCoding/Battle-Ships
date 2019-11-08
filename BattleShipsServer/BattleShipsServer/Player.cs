@@ -24,7 +24,7 @@ namespace BattleShipsServer
         {
             try
             {
-                sentmessage = $"%{message}`";
+                sentmessage = $"¬{message}`";
                 NetworkStream SendDataStream = client.GetStream();
                 byte[] msg = System.Text.Encoding.Unicode.GetBytes(sentmessage);
                 SendDataStream.Write(msg, 0, msg.Length);
@@ -49,11 +49,10 @@ namespace BattleShipsServer
                 if ((i = RecieveDataStream.Read(bytes, 0, bytes.Length)) != 0)
                 {
                     string DataBunched = System.Text.Encoding.Unicode.GetString(bytes, 0, i);
-                    string[] messages = DataBunched.Split('%').Where(x => string.IsNullOrWhiteSpace(x) == false && x != "%").ToArray();
+                    string[] messages = DataBunched.Split('¬').Where(x => string.IsNullOrWhiteSpace(x) == false && x != "¬").ToArray();
                     foreach (var msg in messages)
                     {
                         data = msg.Substring(0, msg.IndexOf("`"));
-                        Console.WriteLine($"Recieved from {name} - {data}");
                         Program.Log($"Recieved from {name} - {data}");
                         if (data.StartsWith("UN:"))
                         {
@@ -87,9 +86,21 @@ namespace BattleShipsServer
                         }
                         else if (data == "CurrentGames")
                         {
-                            foreach (Game g in Program.CurrentGames)
+                            if(Program.CurrentGames.Count != 0)
                             {
-                                Send("Game:" + g.Name);
+                                string Games = "Games:";
+                                foreach (Game g in Program.CurrentGames)
+                                {
+                                    if (g == Program.CurrentGames[0])
+                                    {
+                                        Games += g.Name;
+                                    }
+                                    else
+                                    {
+                                        Games += "," + g.Name;
+                                    }
+                                }
+                                Send(Games);
                             }
                         }
                         else if (data.StartsWith("JoinGame:"))
@@ -126,6 +137,9 @@ namespace BattleShipsServer
                         {
                             var SL = data.Split(':');
                             GameIn.CheckShip(SL[1],this);
+                        }else if (data.StartsWith("Message:"))
+                        {
+                            GameIn.Messaging(this, data);
                         }
                     }
                 }

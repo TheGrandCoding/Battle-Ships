@@ -25,7 +25,7 @@ namespace BattleShipsServer
             MakeLog();
             Log("Start");
             ip = Getipadress();
-            Console.WriteLine(ip.ToString());
+            Program.Log("IP:"+ip.ToString());
             Start();
         }
         static void Start()
@@ -35,7 +35,7 @@ namespace BattleShipsServer
             while (true)
             {
                 TcpClient newcon = Server.AcceptTcpClient();
-                Console.WriteLine("Accepted V4 connection from " + ((IPEndPoint)newcon.Client.RemoteEndPoint).Address.ToString());
+                Program.Log("Accepted connection from " + ((IPEndPoint)newcon.Client.RemoteEndPoint).Address.ToString());
                 Thread nu = new Thread(() => NewUser(newcon));
                 nu.Start();
             }
@@ -68,6 +68,7 @@ namespace BattleShipsServer
             {
                 using (StreamWriter swAppend = File.AppendText(LogName))
                 {
+                    Console.WriteLine(message);
                     swAppend.WriteLine($"[{DateTime.Now.Hour.ToString()}:{DateTime.Now.Minute.ToString()}:{DateTime.Now.Second.ToString()}] - {message}");
                 }
             }

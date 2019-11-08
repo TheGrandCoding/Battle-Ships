@@ -61,7 +61,7 @@ namespace BattleShipsServer
                 opp.Board[xpos, ypos] = 'M';
                 p.Send("Miss:"+ShipNum);
                 opp.Send("OMiss:"+ShipNum);
-
+                p.Send("OTurn");
                 opp.Send("Turn");
             }
             else if(value  == 'X'||value  == 'M')
@@ -93,6 +93,7 @@ namespace BattleShipsServer
                     }
                 }
                 opp.Send("Turn");
+                p.Send("OTurn");
             }
         }
         private bool CheckShipTaken(char ShipLetter , Player player)
@@ -140,6 +141,17 @@ namespace BattleShipsServer
             else
             {
                 return null;
+            }
+        }
+        public void Messaging(Player p , string message)
+        {
+            if (p == p1)
+            {
+                p2.Send(message);
+            }
+            else if (p == p2)
+            {
+                p1.Send(message);
             }
         }
     }

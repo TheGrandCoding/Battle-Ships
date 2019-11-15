@@ -35,9 +35,7 @@ namespace BattleShipsServer
                 Program.Log($"[Error]{name}-{ex.ToString()}");
             }
         }
-        Game temp;
-        List<char> ShipLetters = new List<char>() { 'A', 'B', 'C', 'D', 'E' };
-        int ShipNumber = 0;
+        Game temp = null;
         public void RecieveData()
         {
             string data = "";
@@ -113,20 +111,23 @@ namespace BattleShipsServer
                                     temp = g;
                                 }
                             }
-                            GameIn = temp;
-                            temp.p2 = this;
-                            Send("JoinedGame:" + temp.Name);
-                            temp.StartGame();
+                            if(temp != null)
+                            {
+                                GameIn = temp;
+                                temp.p2 = this;
+                                Send("JoinedGame:" + temp.Name);
+                                temp.StartGame();
+                            }
                         }else if (data.StartsWith("Ships:"))
                         {
                             var SL = data.Split(':');
                             var splitlist = SL[1].Split(',');
+                            char ShipNum = FindShipNumber(splitlist.Length);
                             foreach(var c in splitlist)
                             {
-                                Ships.Add($"{ShipLetters[ShipNumber]}:{c}");
-                                Board[int.Parse(c[0].ToString()),int.Parse(c[1].ToString())] = ShipLetters[ShipNumber];
+                                Ships.Add($"{ShipNum}:{c}");
+                                Board[int.Parse(c[0].ToString()),int.Parse(c[1].ToString())] = ShipNum;
                             }
-                            ShipNumber++;
                         }
                         else if(data == "ShipsConfirmed")
                         {
@@ -140,10 +141,43 @@ namespace BattleShipsServer
                         }else if (data.StartsWith("Message:"))
                         {
                             GameIn.Messaging(this, data);
+                        }else if(data == "LeftG")
+                        {
+                            GameIn.EndGame(this);
+                            GameIn = null;
                         }
                     }
                 }
             }
+        }
+        public bool ThreeShip = false;
+        private char FindShipNumber(int len)
+        {
+            int shipnum= -1;
+            if(len == 2)
+            {
+                shipnum =0;
+            }
+            else if(len == 4)
+            {
+                shipnum =3;
+            }else if (len == 5)
+            {
+                shipnum =4;
+            }else if(len == 3)
+            {
+                if(ThreeShip == false)
+                {
+                    ThreeShip = true;
+                    shipnum =1;
+                }
+                else
+                {
+                    ThreeShip = false;
+                    shipnum =2;
+                }
+            }
+            return Convert.ToChar(shipnum.ToString());
         }
         private void PrintShips()
         {

@@ -70,14 +70,15 @@ namespace BattleShipsServer
             }
             else
             {
+                Console.WriteLine(value);
                 opp.Board[xpos, ypos] = 'X';
                 string SunkShip = GetTakenShip(value,opp);
-                p.Send("Hit:"+ShipNum);
-                opp.Send("OHit:"+ShipNum);
+                p.Send($"Hit:{value}:{ShipNum}");
+                opp.Send($"OHit:{value}:{ShipNum}");
                 if(SunkShip != null)
                 {
-                    p.Send("OSunk:"+SunkShip);
-                    opp.Send("Sunk:" + SunkShip);
+                    p.Send($"OSunk:{value}:{SunkShip}");
+                    opp.Send($"Sunk:{value}:{SunkShip}");
                     bool GameEnd = CheckGameEnd(opp);
                     if(GameEnd == true)
                     {
@@ -110,11 +111,11 @@ namespace BattleShipsServer
         }
         private bool CheckGameEnd(Player p)
         {
-            return CheckShipTaken('A', p)
-                && CheckShipTaken('B', p)
-                && CheckShipTaken('C', p)
-                && CheckShipTaken('D', p)
-                && CheckShipTaken('E', p);
+            return CheckShipTaken('0', p)
+                && CheckShipTaken('1', p)
+                && CheckShipTaken('2', p)
+                && CheckShipTaken('3', p)
+                && CheckShipTaken('4', p);
         }
         private string GetTakenShip(char ShipLetter , Player player)
         {
@@ -153,6 +154,28 @@ namespace BattleShipsServer
             {
                 p1.Send(message);
             }
+        }
+        public void EndGame(Player p)
+        {
+            if (p1 == null || p2 == null)
+            {
+                return;
+            }
+            if (p ==p1)
+            {
+                p2.Send("Win");
+            }
+            else if (p == p2)
+            {
+                p1.Send("Win");
+            }
+            p1.GameIn = null;
+            p1.Ships.Clear();
+            p1.ShipSent = false;
+            p2.GameIn = null;
+            p2.Ships.Clear();
+            p2.ShipSent = false;
+            Program.CurrentGames.Remove(this);
         }
     }
 }

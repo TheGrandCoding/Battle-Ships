@@ -32,7 +32,11 @@ namespace BattleShipsServer
             }
             catch (Exception ex)
             {
-                Program.Log($"[Error]{name}-{ex.ToString()}");
+                Program.Log($"[Error]SEND {name}-{ex.ToString()}");
+                if (GameIn != null)
+                {
+                    GameIn.EndGame(this);
+                }
             }
         }
         Game temp = null;
@@ -42,111 +46,125 @@ namespace BattleShipsServer
             NetworkStream RecieveDataStream = client.GetStream();
             byte[] bytes = new byte[256];
             int i;
-            while (true)
+            try
             {
-                if ((i = RecieveDataStream.Read(bytes, 0, bytes.Length)) != 0)
+                while (true)
                 {
-                    string DataBunched = System.Text.Encoding.Unicode.GetString(bytes, 0, i);
-                    string[] messages = DataBunched.Split('¬').Where(x => string.IsNullOrWhiteSpace(x) == false && x != "¬").ToArray();
-                    foreach (var msg in messages)
+                    if ((i = RecieveDataStream.Read(bytes, 0, bytes.Length)) != 0)
                     {
-                        data = msg.Substring(0, msg.IndexOf("`"));
-                        Program.Log($"Recieved from {name} - {data}");
-                        if (data.StartsWith("UN:"))
+                        string DataBunched = System.Text.Encoding.Unicode.GetString(bytes, 0, i);
+                        string[] messages = DataBunched.Split('¬').Where(x => string.IsNullOrWhiteSpace(x) == false && x != "¬").ToArray();
+                        foreach (var msg in messages)
                         {
-                            var splitlist = data.Split(':');
-                            name = splitlist[1];
-                        }
-                        else if (data.StartsWith("NewGame:"))
-                        {
-                            var splitlist = data.Split(':');
-                            bool uniquename = true;
-                            foreach (Game g in Program.CurrentGames)
+                            data = msg.Substring(0, msg.IndexOf("`"));
+                            Program.Log($"Recieved from {name} - {data}");
+                            if (data.StartsWith("UN:"))
                             {
-                                if (g.Name == splitlist[1])
-                                {
-                                    uniquename = false;
-                                }
+                                var splitlist = data.Split(':');
+                                name = splitlist[1];
                             }
-                            if (uniquename == false)
+                            else if (data.StartsWith("NewGame:"))
                             {
-                                Send("InvalidName");
-                            }
-                            else
-                            {
-                                Game newgame = new Game();
-                                Program.CurrentGames.Add(newgame);
-                                newgame.Name = splitlist[1];
-                                GameIn = newgame;
-                                newgame.p1 = this;
-                                Send("JoinedGame:" + newgame.Name);
-                            }
-                        }
-                        else if (data == "CurrentGames")
-                        {
-                            if(Program.CurrentGames.Count != 0)
-                            {
-                                string Games = "Games:";
+                                var splitlist = data.Split(':');
+                                bool uniquename = true;
                                 foreach (Game g in Program.CurrentGames)
                                 {
-                                    if (g == Program.CurrentGames[0])
+                                    if (g.Name == splitlist[1])
                                     {
-                                        Games += g.Name;
-                                    }
-                                    else
-                                    {
-                                        Games += "," + g.Name;
+                                        uniquename = false;
                                     }
                                 }
-                                Send(Games);
-                            }
-                        }
-                        else if (data.StartsWith("JoinGame:"))
-                        {
-                            var splitlist = data.Split(':');
-                            foreach (Game g in Program.CurrentGames)
-                            {
-                                if (g.Name == splitlist[1])
+                                if (uniquename == false)
                                 {
-                                    temp = g;
+                                    Send("InvalidName");
+                                }
+                                else
+                                {
+                                    Game newgame = new Game();
+                                    Program.CurrentGames.Add(newgame);
+                                    newgame.Name = splitlist[1];
+                                    GameIn = newgame;
+                                    newgame.p1 = this;
+                                    Send("JoinedGame:" + newgame.Name);
                                 }
                             }
-                            if(temp != null)
+                            else if (data == "CurrentGames")
                             {
-                                GameIn = temp;
-                                temp.p2 = this;
-                                Send("JoinedGame:" + temp.Name);
-                                temp.StartGame();
+                                if (Program.CurrentGames.Count != 0)
+                                {
+                                    string Games = "Games:";
+                                    foreach (Game g in Program.CurrentGames)
+                                    {
+                                        if (g == Program.CurrentGames[0])
+                                        {
+                                            Games += g.Name;
+                                        }
+                                        else
+                                        {
+                                            Games += "," + g.Name;
+                                        }
+                                    }
+                                    Send(Games);
+                                }
                             }
-                        }else if (data.StartsWith("Ships:"))
-                        {
-                            var SL = data.Split(':');
-                            var splitlist = SL[1].Split(',');
-                            char ShipNum = FindShipNumber(splitlist.Length);
-                            foreach(var c in splitlist)
+                            else if (data.StartsWith("JoinGame:"))
                             {
-                                Ships.Add($"{ShipNum}:{c}");
-                                Board[int.Parse(c[0].ToString()),int.Parse(c[1].ToString())] = ShipNum;
+                                var splitlist = data.Split(':');
+                                foreach (Game g in Program.CurrentGames)
+                                {
+                                    if (g.Name == splitlist[1])
+                                    {
+                                        temp = g;
+                                    }
+                                }
+                                if (temp != null)
+                                {
+                                    GameIn = temp;
+                                    temp.p2 = this;
+                                    Send("JoinedGame:" + temp.Name);
+                                    temp.StartGame();
+                                }
                             }
-                        }
-                        else if(data == "ShipsConfirmed")
-                        {
-                            PrintShips();
-                            ShipSent = true;
-                            GameIn.Play();
-                        }else if (data.StartsWith("OShip:"))
-                        {
-                            var SL = data.Split(':');
-                            GameIn.CheckShip(SL[1],this);
-                        }else if (data.StartsWith("Message:"))
-                        {
-                            GameIn.Messaging(this, data);
-                        }else if(data == "LeftG")
-                        {
-                            GameIn.EndGame(this);
-                            GameIn = null;
+                            else if (data.StartsWith("Ships:"))
+                            {
+                                var SL = data.Split(':');
+                                var splitlist = SL[1].Split(',');
+                                char ShipNum = FindShipNumber(splitlist.Length);
+                                foreach (var c in splitlist)
+                                {
+                                    Ships.Add($"{ShipNum}:{c}");
+                                    Board[int.Parse(c[0].ToString()), int.Parse(c[1].ToString())] = ShipNum;
+                                }
+                            }
+                            else if (data == "ShipsConfirmed")
+                            {
+                                PrintShips();
+                                ShipSent = true;
+                                GameIn.Play();
+                            }
+                            else if (data.StartsWith("OShip:"))
+                            {
+                                var SL = data.Split(':');
+                                GameIn.CheckShip(SL[1], this);
+                            }
+                            else if (data.StartsWith("Message:"))
+                            {
+                                GameIn.Messaging(this, data);
+                            }
+                            else if (data == "LeftG")
+                            {
+                                GameIn.EndGame(this);
+                                GameIn = null;
+                            }
                         }
                     }
+                }
+            }catch(Exception ex)
+            {
+                Program.Log($"[ERROR]REC {name} - {ex}");
+                if (GameIn != null)
+                {
+                    GameIn.EndGame(this);
                 }
             }
         }

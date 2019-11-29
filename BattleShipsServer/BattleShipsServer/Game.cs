@@ -157,8 +157,10 @@ namespace BattleShipsServer
         }
         public void EndGame(Player p)
         {
-            if (p1 == null || p2 == null)
+            if (p2 == null)
             {
+                Program.CurrentGames.Remove(this);
+                p1.GameIn = null;
                 return;
             }
             if (p ==p1)
